@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Practical Vault</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--text:#1a1d23;--muted:#6b7280;--line:#e5e7eb;--accent:#4f46e5;--accent-t:#fff;--code:#0f172a;--code-t:#e2e8f0;--mark:#fde68a;--danger:#dc2626}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1116;--card:#171b22;--text:#e6e8ec;--muted:#8b93a1;--line:#272d38;--accent:#818cf8;--accent-t:#0e1116;--code:#0a0d12;--mark:#854d0e}}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:14px 20px}
+.wrap{max-width:960px;margin:0 auto}
+.top{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+h1{font-size:20px;margin:0;letter-spacing:-.3px}
+.search{flex:1;min-width:220px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:15px}
+.search:focus,input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--text);padding:8px 14px;border-radius:8px}
+button:hover{border-color:var(--accent)}
+.primary{background:var(--accent);color:var(--accent-t);border-color:var(--accent);font-weight:600}
+.danger{color:var(--danger)}
+.tabs{display:flex;gap:6px;margin-top:12px;overflow-x:auto;padding-bottom:2px}
+.tab{white-space:nowrap;border-radius:999px;padding:6px 14px;font-size:14px}
+.tab.active{background:var(--accent);color:var(--accent-t);border-color:var(--accent)}
+.tab small{opacity:.7;margin-left:4px}
+.tabs.dim{opacity:.4;pointer-events:none}
+main{padding:20px}
+.info{color:var(--muted);font-size:14px;margin:0 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.head{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;cursor:pointer}
+.num{background:var(--accent);color:var(--accent-t);font-weight:700;font-size:13px;border-radius:8px;padding:4px 10px;white-space:nowrap}
+.aim{flex:1;line-height:1.45}
+.badge{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 8px;white-space:nowrap}
+.body{display:none;border-top:1px solid var(--line)}
+.card.open .body{display:block}
+.bar{display:flex;gap:8px;padding:10px 16px;align-items:center}
+.bar .sp{flex:1}
+.bar button{padding:4px 10px;font-size:13px}
+pre{margin:0;padding:16px;background:var(--code);color:var(--code-t);overflow:auto;font:13px/1.55 ui-monospace,Menlo,Consolas,monospace;max-height:520px}
+mark{background:var(--mark);color:inherit;border-radius:3px;padding:0 1px}
+.empty{text-align:center;color:var(--muted);padding:60px 0}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text);width:min(640px,94vw);padding:22px}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+dialog h2{margin:0 0 14px;font-size:18px}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 4px}
+input,textarea,select{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:inherit}
+textarea{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;min-height:200px;resize:vertical;tab-size:4}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;opacity:0;transition:.25s;pointer-events:none;z-index:20}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="top">
+    <h1>📚 Practical Vault</h1>
+    <input id="q" class="search" type="search" placeholder="Search by aim, keyword, code or practical no…" autocomplete="off">
+    <button class="primary" id="addP">+ Practical</button>
+    <button id="addS">+ Subject</button>
+  </div>
+  <div class="tabs" id="tabs"></div>
+</div></header>
+
+<main><div class="wrap">
+  <p class="info" id="info"></p>
+  <div id="list"></div>
+</div></main>
+
+<dialog id="dP">
+  <h2 id="dPTitle">Add practical</h2>
+  <div class="row">
+    <div><label>Subject</label><select id="fSub"></select></div>
+    <div><label>Practical No.</label><input id="fNum" placeholder="e.g. 5"></div>
+    <div><label>Language</label><input id="fLang" placeholder="python, java, sql…"></div>
+  </div>
+  <label>Aim</label><textarea id="fAim" style="min-height:70px;font-family:inherit;font-size:14px" placeholder="Write a program to…"></textarea>
+  <label>Code</label><textarea id="fCode" spellcheck="false" placeholder="Paste your code here"></textarea>
+  <div class="actions"><button id="cP">Cancel</button><button class="primary" id="sP">Save</button></div>
+</dialog>
+
+<dialog id="dS">
+  <h2>Add subject</h2>
+  <label>Subject name</label><input id="sName" placeholder="e.g. Data Structures">
+  <div class="actions"><button id="cS">Cancel</button><button class="primary" id="sS">Add</button></div>
+</dialog>
+
+<div id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+let subjects = [], current = null, editingId = null, timer;
+
+async function api(url, method = 'GET', body) {
+  const r = await fetch(url, {method, headers: {'Content-Type': 'application/json'}, body: body ? JSON.stringify(body) : undefined});
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || 'Something went wrong');
+  return d;
+}
+function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); }
+
+function el(tag, props = {}, ...kids) {
+  const e = document.createElement(tag);
+  Object.entries(props).forEach(([k, v]) => k === 'class' ? e.className = v : k.startsWith('on') ? e.addEventListener(k.slice(2), v) : e[k] = v);
+  kids.forEach(k => e.append(k));
+  return e;
+}
+function highlight(text, words) {
+  const frag = document.createDocumentFragment();
+  if (!words.length) { frag.append(text); return frag; }
+  const re = new RegExp('(' + words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'gi');
+  text.split(re).forEach((part, i) => frag.append(i % 2 ? el('mark', {textContent: part}) : part));
+  return frag;
+}
+
+async function loadSubjects() {
+  subjects = await api('/api/subjects');
+  if (!subjects.find(s => s.id === current)) current = subjects.length ? subjects[0].id : null;
+  renderTabs();
+}
+function renderTabs() {
+  const t = $('tabs'); t.innerHTML = '';
+  t.classList.toggle('dim', !!$('q').value.trim());
+  subjects.forEach(s => t.append(el('button', {class: 'tab' + (s.id === current ? ' active' : ''), onclick: () => { current = s.id; renderTabs(); load(); }},
+    s.name, el('small', {textContent: s.count}))));
+}
+
+async function load() {
+  const q = $('q').value.trim();
+  renderTabs();
+  if (q) {
+    const res = await api('/api/search?q=' + encodeURIComponent(q));
+    $('info').textContent = res.length ? `${res.length} match${res.length > 1 ? 'es' : ''} for "${q}" across all subjects` : '';
+    render(res, q.toLowerCase().split(/\s+/), true);
+  } else if (current) {
+    const res = await api('/api/practicals?subject_id=' + current);
+    const s = subjects.find(x => x.id === current);
+    $('info').innerHTML = '';
+    $('info').append(`${s.name} · ${res.length} practical${res.length === 1 ? '' : 's'} `);
+    if (!res.length) $('info').append(el('button', {class: 'danger', textContent: 'Delete subject', style: 'padding:2px 8px;font-size:12px;margin-left:8px', onclick: () => delSubject(s.id)}));
+    render(res, [], false);
+  } else {
+    $('info').textContent = '';
+    render([], [], false, 'No subjects yet. Click "+ Subject" to start.');
+  }
+}
+
+function render(items, words, showSub, emptyMsg) {
+  const list = $('list'); list.innerHTML = '';
+  if (!items.length) { list.append(el('div', {class: 'empty', textContent: emptyMsg || ($('q').value.trim() ? 'No practical matches your search.' : 'No practicals here yet. Be the first to add one!')})); return; }
+  items.forEach(p => {
+    const card = el('div', {class: 'card' + (words.length && words.some(w => p.code.toLowerCase().includes(w) && !p.aim.toLowerCase().includes(w)) ? '' : '')});
+    const head = el('div', {class: 'head', onclick: () => card.classList.toggle('open')},
+      el('span', {class: 'num', textContent: 'Practical ' + p.number}),
+      el('div', {class: 'aim'}, highlight(p.aim, words)));
+    if (showSub) head.append(el('span', {class: 'badge', textContent: p.subject}));
+    const bar = el('div', {class: 'bar'},
+      el('span', {class: 'badge', textContent: p.language || 'code'}), el('span', {class: 'sp'}),
+      el('button', {textContent: 'Copy', onclick: async () => { await navigator.clipboard.writeText(p.code); toast('Code copied'); }}),
+      el('button', {textContent: 'Edit', onclick: () => openP(p)}),
+      el('button', {class: 'danger', textContent: 'Delete', onclick: () => delP(p.id)}));
+    const pre = el('pre', {}, el('code', {}, highlight(p.code, words)));
+    card.append(head, el('div', {class: 'body'}, bar, pre));
+    list.append(card);
+    if (words.length && showSub && words.some(w => p.code.toLowerCase().includes(w))) card.classList.add('open');
+  });
+}
+
+// ----- practical dialog -----
+function openP(p) {
+  if (!subjects.length) return toast('Add a subject first');
+  editingId = p ? p.id : null;
+  $('dPTitle').textContent = p ? 'Edit practical' : 'Add practical';
+  $('fSub').innerHTML = '';
+  subjects.forEach(s => $('fSub').append(el('option', {value: s.id, textContent: s.name})));
+  $('fSub').value = p ? p.subject_id : current;
+  $('fSub').disabled = !!p;
+  $('fNum').value = p ? p.number : '';
+  $('fLang').value = p ? p.language : '';
+  $('fAim').value = p ? p.aim : '';
+  $('fCode').value = p ? p.code : '';
+  $('dP').showModal();
+}
+$('addP').onclick = () => openP();
+$('cP').onclick = () => $('dP').close();
+$('sP').onclick = async () => {
+  const body = {subject_id: +$('fSub').value, number: $('fNum').value, language: $('fLang').value, aim: $('fAim').value, code: $('fCode').value};
+  try {
+    if (editingId) await api('/api/practicals/' + editingId, 'PUT', body); else { await api('/api/practicals', 'POST', body); current = body.subject_id; }
+    $('dP').close(); toast('Saved'); await loadSubjects(); load();
+  } catch (e) { toast(e.message); }
+};
+async function delP(id) {
+  if (!confirm('Delete this practical? This cannot be undone.')) return;
+  await api('/api/practicals/' + id, 'DELETE'); toast('Deleted'); await loadSubjects(); load();
+}
+
+// ----- subject dialog -----
+$('addS').onclick = () => { $('sName').value = ''; $('dS').showModal(); $('sName').focus(); };
+$('cS').onclick = () => $('dS').close();
+$('sS').onclick = async () => {
+  try {
+    const s = await api('/api/subjects', 'POST', {name: $('sName').value});
+    current = s.id; $('dS').close(); await loadSubjects(); load();
+  } catch (e) { toast(e.message); }
+};
+$('sName').addEventListener('keydown', e => { if (e.key === 'Enter') $('sS').click(); });
+async function delSubject(id) {
+  if (!confirm('Delete this empty subject?')) return;
+  try { await api('/api/subjects/' + id, 'DELETE'); await loadSubjects(); load(); } catch (e) { toast(e.message); }
+}
+
+// Tab key inserts indentation in code box
+$('fCode').addEventListener('keydown', e => {
+  if (e.key === 'Tab') { e.preventDefault(); const t = e.target, s = t.selectionStart; t.setRangeText('    ', s, t.selectionEnd, 'end'); }
+});
+
+// ----- search -----
+$('q').addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(load, 250); });
+
+(async () => { await loadSubjects(); load(); })();
+</script>
+</body>
+</html>
