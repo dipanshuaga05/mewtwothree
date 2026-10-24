@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Practical Vault</title>
+<title>Pokédex</title>
 <style>
-:root{--bg:#f6f7f9;--card:#fff;--text:#1a1d23;--muted:#6b7280;--line:#e5e7eb;--accent:#4f46e5;--accent-t:#fff;--code:#0f172a;--code-t:#e2e8f0;--mark:#fde68a;--danger:#dc2626}
-@media(prefers-color-scheme:dark){:root{--bg:#0e1116;--card:#171b22;--text:#e6e8ec;--muted:#8b93a1;--line:#272d38;--accent:#818cf8;--accent-t:#0e1116;--code:#0a0d12;--mark:#854d0e}}
+:root{--bg:#f6f7f9;--card:#fff;--text:#1a1d23;--muted:#6b7280;--line:#e5e7eb;--accent:#4f46e5;--accent-t:#fff;--pre:#0f172a;--pre-t:#e2e8f0;--mark:#fde68a;--danger:#dc2626}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1116;--card:#171b22;--text:#e6e8ec;--muted:#8b93a1;--line:#272d38;--accent:#818cf8;--accent-t:#0e1116;--pre:#0a0d12;--mark:#854d0e}}
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
 header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:14px 20px}
 .wrap{max-width:960px;margin:0 auto}
 .top{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-h1{font-size:20px;margin:0;letter-spacing:-.3px}
+h1{font-size:20px;margin:0}
 .search{flex:1;min-width:220px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:15px}
 .search:focus,input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
 button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--text);padding:8px 14px;border-radius:8px}
@@ -29,14 +29,14 @@ main{padding:20px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden}
 .head{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;cursor:pointer}
 .num{background:var(--accent);color:var(--accent-t);font-weight:700;font-size:13px;border-radius:8px;padding:4px 10px;white-space:nowrap}
-.aim{flex:1;line-height:1.45}
+.ttl{flex:1;line-height:1.45}
 .badge{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 8px;white-space:nowrap}
 .body{display:none;border-top:1px solid var(--line)}
 .card.open .body{display:block}
 .bar{display:flex;gap:8px;padding:10px 16px;align-items:center}
 .bar .sp{flex:1}
 .bar button{padding:4px 10px;font-size:13px}
-pre{margin:0;padding:16px;background:var(--code);color:var(--code-t);overflow:auto;font:13px/1.55 ui-monospace,Menlo,Consolas,monospace;max-height:520px}
+pre{margin:0;padding:16px;background:var(--pre);color:var(--pre-t);overflow:auto;font:13px/1.55 ui-monospace,Menlo,Consolas,monospace;max-height:520px}
 mark{background:var(--mark);color:inherit;border-radius:3px;padding:0 1px}
 .empty{text-align:center;color:var(--muted);padding:60px 0}
 dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text);width:min(640px,94vw);padding:22px}
@@ -54,10 +54,11 @@ textarea{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;min-he
 <body>
 <header><div class="wrap">
   <div class="top">
-    <h1>📚 Practical Vault</h1>
-    <input id="q" class="search" type="search" placeholder="Search by aim, keyword, code or practical no…" autocomplete="off">
-    <button class="primary" id="addP">+ Practical</button>
-    <button id="addS">+ Subject</button>
+    <h1>⚡ Pokédex</h1>
+    <input id="q" class="search" type="search" placeholder="Search Pokémon…" autocomplete="off">
+    <button class="primary" id="addT">+ Pokémon</button>
+    <button id="addL">+ Region</button>
+    <button id="lock" title="Lock">🔒</button>
   </div>
   <div class="tabs" id="tabs"></div>
 </div></header>
@@ -67,38 +68,39 @@ textarea{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;min-he
   <div id="list"></div>
 </div></main>
 
-<dialog id="dP">
-  <h2 id="dPTitle">Add practical</h2>
+<dialog id="dT">
+  <h2 id="dTTitle">Add Pokémon</h2>
   <div class="row">
-    <div><label>Subject</label><select id="fSub"></select></div>
-    <div><label>Practical No.</label><input id="fNum" placeholder="e.g. 5"></div>
-    <div><label>Language</label><input id="fLang" placeholder="python, java, sql…"></div>
+    <div><label>Region</label><select id="fList"></select></div>
+    <div><label>Dex No.</label><input id="fNo" placeholder="e.g. 25"></div>
+    <div><label>Type</label><input id="fTag" placeholder="e.g. Electric"></div>
   </div>
-  <label>Aim</label><textarea id="fAim" style="min-height:70px;font-family:inherit;font-size:14px" placeholder="Write a program to…"></textarea>
-  <label>Code</label><textarea id="fCode" spellcheck="false" placeholder="Paste your code here"></textarea>
-  <div class="actions"><button id="cP">Cancel</button><button class="primary" id="sP">Save</button></div>
+  <label>Name</label><input id="fTitle" placeholder="e.g. Pikachu">
+  <label>Notes</label><textarea id="fDetails" spellcheck="false"></textarea>
+  <div class="actions"><button id="cT">Cancel</button><button class="primary" id="sT">Save</button></div>
 </dialog>
 
-<dialog id="dS">
-  <h2>Add subject</h2>
-  <label>Subject name</label><input id="sName" placeholder="e.g. Data Structures">
-  <div class="actions"><button id="cS">Cancel</button><button class="primary" id="sS">Add</button></div>
+<dialog id="dL">
+  <h2>Add region</h2>
+  <label>Region name</label><input id="lName" placeholder="e.g. Kanto">
+  <div class="actions"><button id="cL">Cancel</button><button class="primary" id="sL">Add</button></div>
 </dialog>
 
 <div id="toast"></div>
 
 <script>
+const TOKEN = "__TOKEN__";
 const $ = id => document.getElementById(id);
-let subjects = [], current = null, editingId = null, timer;
+let lists = [], current = null, editingId = null, timer;
 
 async function api(url, method = 'GET', body) {
-  const r = await fetch(url, {method, headers: {'Content-Type': 'application/json'}, body: body ? JSON.stringify(body) : undefined});
+  const r = await fetch(url, {method, headers: {'Content-Type': 'application/json', 'X-Token': TOKEN}, body: body ? JSON.stringify(body) : undefined});
   const d = await r.json().catch(() => ({}));
+  if (r.status === 401) { location.reload(); throw new Error('Expired'); }
   if (!r.ok) throw new Error(d.error || 'Something went wrong');
   return d;
 }
 function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); }
-
 function el(tag, props = {}, ...kids) {
   const e = document.createElement(tag);
   Object.entries(props).forEach(([k, v]) => k === 'class' ? e.className = v : k.startsWith('on') ? e.addEventListener(k.slice(2), v) : e[k] = v);
@@ -113,15 +115,15 @@ function highlight(text, words) {
   return frag;
 }
 
-async function loadSubjects() {
-  subjects = await api('/api/subjects');
-  if (!subjects.find(s => s.id === current)) current = subjects.length ? subjects[0].id : null;
+async function loadLists() {
+  lists = await api('/api/lists');
+  if (!lists.find(s => s.id === current)) current = lists.length ? lists[0].id : null;
   renderTabs();
 }
 function renderTabs() {
   const t = $('tabs'); t.innerHTML = '';
   t.classList.toggle('dim', !!$('q').value.trim());
-  subjects.forEach(s => t.append(el('button', {class: 'tab' + (s.id === current ? ' active' : ''), onclick: () => { current = s.id; renderTabs(); load(); }},
+  lists.forEach(s => t.append(el('button', {class: 'tab' + (s.id === current ? ' active' : ''), onclick: () => { current = s.id; renderTabs(); load(); }},
     s.name, el('small', {textContent: s.count}))));
 }
 
@@ -130,95 +132,88 @@ async function load() {
   renderTabs();
   if (q) {
     const res = await api('/api/search?q=' + encodeURIComponent(q));
-    $('info').textContent = res.length ? `${res.length} match${res.length > 1 ? 'es' : ''} for "${q}" across all subjects` : '';
+    $('info').textContent = res.length ? `${res.length} Pokémon found` : '';
     render(res, q.toLowerCase().split(/\s+/), true);
   } else if (current) {
-    const res = await api('/api/practicals?subject_id=' + current);
-    const s = subjects.find(x => x.id === current);
+    const res = await api('/api/tasks?list_id=' + current);
+    const s = lists.find(x => x.id === current);
     $('info').innerHTML = '';
-    $('info').append(`${s.name} · ${res.length} practical${res.length === 1 ? '' : 's'} `);
-    if (!res.length) $('info').append(el('button', {class: 'danger', textContent: 'Delete subject', style: 'padding:2px 8px;font-size:12px;margin-left:8px', onclick: () => delSubject(s.id)}));
+    $('info').append(`${s.name} · ${res.length} Pokémon `);
+    if (!res.length) $('info').append(el('button', {class: 'danger', textContent: 'Delete region', style: 'padding:2px 8px;font-size:12px;margin-left:8px', onclick: () => delList(s.id)}));
     render(res, [], false);
   } else {
     $('info').textContent = '';
-    render([], [], false, 'No subjects yet. Click "+ Subject" to start.');
+    render([], [], false, 'No regions yet. Add one to start.');
   }
 }
 
-function render(items, words, showSub, emptyMsg) {
-  const list = $('list'); list.innerHTML = '';
-  if (!items.length) { list.append(el('div', {class: 'empty', textContent: emptyMsg || ($('q').value.trim() ? 'No practical matches your search.' : 'No practicals here yet. Be the first to add one!')})); return; }
-  items.forEach(p => {
-    const card = el('div', {class: 'card' + (words.length && words.some(w => p.code.toLowerCase().includes(w) && !p.aim.toLowerCase().includes(w)) ? '' : '')});
+function render(items, words, showList, emptyMsg) {
+  const box = $('list'); box.innerHTML = '';
+  if (!items.length) { box.append(el('div', {class: 'empty', textContent: emptyMsg || ($('q').value.trim() ? 'No results.' : 'Nothing here yet.')})); return; }
+  items.forEach(t => {
+    const card = el('div', {class: 'card'});
     const head = el('div', {class: 'head', onclick: () => card.classList.toggle('open')},
-      el('span', {class: 'num', textContent: 'Practical ' + p.number}),
-      el('div', {class: 'aim'}, highlight(p.aim, words)));
-    if (showSub) head.append(el('span', {class: 'badge', textContent: p.subject}));
+      el('span', {class: 'num', textContent: '#' + t.no}),
+      el('div', {class: 'ttl'}, highlight(t.title, words)));
+    if (showList) head.append(el('span', {class: 'badge', textContent: t.list}));
     const bar = el('div', {class: 'bar'},
-      el('span', {class: 'badge', textContent: p.language || 'code'}), el('span', {class: 'sp'}),
-      el('button', {textContent: 'Copy', onclick: async () => { await navigator.clipboard.writeText(p.code); toast('Code copied'); }}),
-      el('button', {textContent: 'Edit', onclick: () => openP(p)}),
-      el('button', {class: 'danger', textContent: 'Delete', onclick: () => delP(p.id)}));
-    const pre = el('pre', {}, el('code', {}, highlight(p.code, words)));
-    card.append(head, el('div', {class: 'body'}, bar, pre));
-    list.append(card);
-    if (words.length && showSub && words.some(w => p.code.toLowerCase().includes(w))) card.classList.add('open');
+      el('span', {class: 'badge', textContent: t.tag || 'Type'}), el('span', {class: 'sp'}),
+      el('button', {textContent: 'Copy', onclick: async () => { await navigator.clipboard.writeText(t.details); toast('Copied'); }}),
+      el('button', {textContent: 'Edit', onclick: () => openT(t)}),
+      el('button', {class: 'danger', textContent: 'Delete', onclick: () => delT(t.id)}));
+    card.append(head, el('div', {class: 'body'}, bar, el('pre', {}, el('span', {}, highlight(t.details, words)))));
+    box.append(card);
+    if (words.length && showList && words.some(w => t.details.toLowerCase().includes(w))) card.classList.add('open');
   });
 }
 
-// ----- practical dialog -----
-function openP(p) {
-  if (!subjects.length) return toast('Add a subject first');
-  editingId = p ? p.id : null;
-  $('dPTitle').textContent = p ? 'Edit practical' : 'Add practical';
-  $('fSub').innerHTML = '';
-  subjects.forEach(s => $('fSub').append(el('option', {value: s.id, textContent: s.name})));
-  $('fSub').value = p ? p.subject_id : current;
-  $('fSub').disabled = !!p;
-  $('fNum').value = p ? p.number : '';
-  $('fLang').value = p ? p.language : '';
-  $('fAim').value = p ? p.aim : '';
-  $('fCode').value = p ? p.code : '';
-  $('dP').showModal();
+function openT(t) {
+  if (!lists.length) return toast('Add a region first');
+  editingId = t ? t.id : null;
+  $('dTTitle').textContent = t ? 'Edit Pokémon' : 'Add Pokémon';
+  $('fList').innerHTML = '';
+  lists.forEach(s => $('fList').append(el('option', {value: s.id, textContent: s.name})));
+  $('fList').value = t ? t.list_id : current;
+  $('fList').disabled = !!t;
+  $('fNo').value = t ? t.no : '';
+  $('fTag').value = t ? t.tag : '';
+  $('fTitle').value = t ? t.title : '';
+  $('fDetails').value = t ? t.details : '';
+  $('dT').showModal();
 }
-$('addP').onclick = () => openP();
-$('cP').onclick = () => $('dP').close();
-$('sP').onclick = async () => {
-  const body = {subject_id: +$('fSub').value, number: $('fNum').value, language: $('fLang').value, aim: $('fAim').value, code: $('fCode').value};
+$('addT').onclick = () => openT();
+$('cT').onclick = () => $('dT').close();
+$('sT').onclick = async () => {
+  const body = {list_id: +$('fList').value, no: $('fNo').value, tag: $('fTag').value, title: $('fTitle').value, details: $('fDetails').value};
   try {
-    if (editingId) await api('/api/practicals/' + editingId, 'PUT', body); else { await api('/api/practicals', 'POST', body); current = body.subject_id; }
-    $('dP').close(); toast('Saved'); await loadSubjects(); load();
+    if (editingId) await api('/api/tasks/' + editingId, 'PUT', body); else { await api('/api/tasks', 'POST', body); current = body.list_id; }
+    $('dT').close(); toast('Saved'); await loadLists(); load();
   } catch (e) { toast(e.message); }
 };
-async function delP(id) {
-  if (!confirm('Delete this practical? This cannot be undone.')) return;
-  await api('/api/practicals/' + id, 'DELETE'); toast('Deleted'); await loadSubjects(); load();
+async function delT(id) {
+  if (!confirm('Delete this Pokémon?')) return;
+  await api('/api/tasks/' + id, 'DELETE'); toast('Deleted'); await loadLists(); load();
 }
 
-// ----- subject dialog -----
-$('addS').onclick = () => { $('sName').value = ''; $('dS').showModal(); $('sName').focus(); };
-$('cS').onclick = () => $('dS').close();
-$('sS').onclick = async () => {
-  try {
-    const s = await api('/api/subjects', 'POST', {name: $('sName').value});
-    current = s.id; $('dS').close(); await loadSubjects(); load();
-  } catch (e) { toast(e.message); }
+$('addL').onclick = () => { $('lName').value = ''; $('dL').showModal(); $('lName').focus(); };
+$('cL').onclick = () => $('dL').close();
+$('sL').onclick = async () => {
+  try { const s = await api('/api/lists', 'POST', {name: $('lName').value}); current = s.id; $('dL').close(); await loadLists(); load(); }
+  catch (e) { toast(e.message); }
 };
-$('sName').addEventListener('keydown', e => { if (e.key === 'Enter') $('sS').click(); });
-async function delSubject(id) {
-  if (!confirm('Delete this empty subject?')) return;
-  try { await api('/api/subjects/' + id, 'DELETE'); await loadSubjects(); load(); } catch (e) { toast(e.message); }
+$('lName').addEventListener('keydown', e => { if (e.key === 'Enter') $('sL').click(); });
+async function delList(id) {
+  if (!confirm('Delete this empty region?')) return;
+  try { await api('/api/lists/' + id, 'DELETE'); await loadLists(); load(); } catch (e) { toast(e.message); }
 }
 
-// Tab key inserts indentation in code box
-$('fCode').addEventListener('keydown', e => {
-  if (e.key === 'Tab') { e.preventDefault(); const t = e.target, s = t.selectionStart; t.setRangeText('    ', s, t.selectionEnd, 'end'); }
+$('fDetails').addEventListener('keydown', e => {
+  if (e.key === 'Tab') { e.preventDefault(); const t = e.target; t.setRangeText('    ', t.selectionStart, t.selectionEnd, 'end'); }
 });
-
-// ----- search -----
+$('lock').onclick = async () => { try { await api('/api/logout', 'POST'); } catch (e) {} location.reload(); };
 $('q').addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(load, 250); });
 
-(async () => { await loadSubjects(); load(); })();
+(async () => { await loadLists(); load(); })();
 </script>
 </body>
 </html>
