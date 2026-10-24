@@ -15,7 +15,7 @@ PORT = int(os.environ.get("PORT", 5000))
 # Set SELF_URL to your deployed URL, e.g. https://myapp.onrender.com
 SELF_URL = (os.environ.get("SELF_URL") or os.environ.get("RENDER_EXTERNAL_URL")
             or f"http://127.0.0.1:{PORT}").rstrip("/")
-APP_PASSWORD = os.environ.get("APP_PASSWORD", "changeme")
+APP_PASSWORD = os.environ.get("APP_PASSWORD", "4789")
 if APP_PASSWORD == "changeme":
     print("[warning] APP_PASSWORD not set, using default 'changeme'")
 
